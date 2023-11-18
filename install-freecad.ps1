@@ -1,0 +1,1 @@
+Start-Process 'C:\FreeCAD\FreeCAD-0.21.1-WIN-x64-installer-1.exe' -ArgumentList /S -NoNewWindow -Wait
