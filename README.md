@@ -1,0 +1,1 @@
+# playground-azure-vm-image-builder
