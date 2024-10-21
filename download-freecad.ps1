@@ -1,2 +1,0 @@
-New-Item -ItemType Directory -Force -Path 'C:\FreeCAD\'
-Invoke-WebRequest -Uri 'https://github.com/FreeCAD/FreeCAD/releases/download/0.21.1/FreeCAD-0.21.1-WIN-x64-installer-1.exe' -OutFile 'C:\FreeCAD\FreeCAD-0.21.1-WIN-x64-installer-1.exe'
