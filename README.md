@@ -8,5 +8,5 @@ The image template is configured with a base image to start our image building p
 
 | Sample name   | Description   |
 |---------------|---------------|
-| Software from public repositories | This sample demonstrates how to create an Azure Image Builder that installs publicly accessible software. |
-| Software from Azure Storage | Coming soon... |
+| [Software from public repositories](./software-from-public) | This sample demonstrates how to create an Azure Image Builder that installs publicly accessible software. |
+| [Software from Azure Storage](./software-from-azure-storage) | This sample demonstrates how to create an Azure Image Builder that downloads and installs software from a private Azure Storage account using a managed identity. |
