@@ -23,7 +23,7 @@ data "azurerm_subscription" "current" {
 }
 
 resource "azurerm_resource_group" "builder" {
-  name     = "ImageBuilder-Public-Software-rg"
+  name     = "ImageBuilder-AzureStorage-rg"
   location = "uksouth"
 }
 

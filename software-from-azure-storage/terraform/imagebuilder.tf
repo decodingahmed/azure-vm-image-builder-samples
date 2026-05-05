@@ -18,6 +18,7 @@ resource "azapi_resource" "builder" {
       vmProfile = {
         osDiskSizeGB           = 128
         vmSize                 = "Standard_D4s_v3"
+        userAssignedIdentityId = [azurerm_user_assigned_identity.buildervm.id]
       }
       source = {
         type      = "PlatformImage"
@@ -29,10 +30,20 @@ resource "azapi_resource" "builder" {
       customize = [
         {
           type        = "PowerShell"
-          name        = "Install draw.io"
+          name        = "Set environment variables"
           runElevated = true
           runAsSystem = true
-          inline      = split("\n", file("${path.module}/scripts/Install-Drawio.ps1"))
+          inline = [
+            "[System.Environment]::SetEnvironmentVariable('MANAGED_IDENTITY_CLIENT_ID','${azurerm_user_assigned_identity.buildervm.client_id}', 'Machine')",
+            "[System.Environment]::SetEnvironmentVariable('SOFTWARE_DOWNLOAD_URL','${data.azurerm_storage_blob.software.url}', 'Machine')",
+          ]
+        },
+        {
+          type        = "PowerShell"
+          name        = "Download software from storage account"
+          runElevated = true
+          runAsSystem = true
+          inline      = split("\n", file("${path.module}/scripts/Download-Software.ps1"))
         }
       ]
 
@@ -51,7 +62,9 @@ resource "azapi_resource" "builder" {
   })
   depends_on = [
     azurerm_user_assigned_identity.builder,
-    azurerm_role_assignment.builder
+    azurerm_role_assignment.builder,
+    azurerm_user_assigned_identity.buildervm,
+    azurerm_role_assignment.buildervmsoftware,
   ]
 }
 
@@ -70,4 +83,22 @@ resource "azurerm_role_assignment" "builder" {
   principal_id         = azurerm_user_assigned_identity.builder.principal_id
   role_definition_name = azurerm_role_definition.builder.name
   depends_on           = [azurerm_role_definition.builder]
+}
+
+#
+# Azure Image Builder Virtual Machine identity related resources
+#
+
+# Identity for the VM that gets created to run the customisation script
+resource "azurerm_user_assigned_identity" "buildervm" {
+  name                = "ImageBuilder-VM-ManagedId"
+  location            = azurerm_resource_group.builder.location
+  resource_group_name = azurerm_resource_group.builder.name
+}
+
+# Assignment to allow the VM profile customisation script to download from the 'software' storage account
+resource "azurerm_role_assignment" "buildervmsoftware" {
+  scope                = data.azurerm_storage_account.software.id
+  principal_id         = azurerm_user_assigned_identity.buildervm.principal_id
+  role_definition_name = "Storage Blob Data Reader"
 }
